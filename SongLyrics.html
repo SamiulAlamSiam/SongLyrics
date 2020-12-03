@@ -1,0 +1,121 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title></title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <script src="../Scripts/jquery-1.10.2.js"></script>
+    <script src="../Scripts/bootstrap.js"></script>
+    <script src="../Scripts/respond.js"></script>
+    <link href="../Content/bootstrap.css" rel="stylesheet" />
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+</head>
+    <body ng-app="apiApp">
+        <br/>
+        <div class="container" ng-controller="songLyricsController">
+            
+            <div ng-show="ViewData == 0">
+                <h2> Search by Song Name </h2>
+                <input type="text" class="text-center" ng-model="songName" />
+                <input type="button" class="btn btn-success" value="Search" ng-click="Init()" />
+                <br/> <br/>
+                <table class="table table-hover table-striped table-bordered">
+                    <tr>
+                        <td>ID</td>
+                        <td>Titile</td>
+                        <td>Artist Name</td>
+                        <td>Link</td>
+                    </tr>
+                    <tr ng-repeat="getSong in Songs.data" ng-if="$index <= 9">
+                        <td>{{getSong.id}}</td>
+                        <td>{{getSong.title}}</td>
+                        <td>{{getSong.artist.name}}</td>
+                        <td><input type="button" class="btn btn-success" value="Get Lyrics" ng-click="GetLyrics(getSong.title, getSong.artist.name)" /></td>
+                    </tr>
+                </table>
+            </div>
+            
+            <div ng-show="ViewData == 1">
+                <input type="button" value="Back" class="btn btn-default" ng-click="Back()" />
+
+                <h2>{{artist}}</h2>
+
+                <p>
+                    {{selectedLyrics}}
+                </p>
+
+                <p></p>
+
+            </div>
+
+        </div>
+        
+        <script>
+            var app = angular.module('apiApp', []);
+
+            app.controller('songLyricsController', function ($scope, $http) {
+
+                $scope.ViewData = 0;
+
+                $scope.Songs = [];
+                $scope.selectedLyrics = {};
+
+                $scope.Init = function() {
+                    $scope.GetSong();
+                };
+
+                $scope.GetSong = function () {
+                    $http({
+                        method: "GET",
+                        url: "https://api.lyrics.ovh/suggest/" + $scope.songName
+                    }).then(
+
+                        function mySuccess(response) {
+                            //alert('Success');
+                            $scope.Songs = response.data;
+                            console.log(response.data);
+                        },
+
+                        function myError(response) {
+                            alert('Not Success');
+                            //$scope.Activity = response.data;
+                            console.log(response.data);
+                            //$scope.myWelcome = response.statusText;
+                        });
+                };
+
+                $scope.GetLyrics = function (songTitle, artist) {
+                    //alert(songTitle);
+                    //alert(artist);
+
+                    $http({
+                        method: "GET",
+                        url: "https://api.lyrics.ovh/v1/" + artist + "/"+ songTitle
+                    }).then(
+
+                        function mySuccess(response) {
+                            //alert('Success Lyrics');
+                            $scope.selectedLyrics = response.data;
+                            $scope.ViewData = 1;
+                            //console.log(response.data);
+                        },
+
+                        function myError(response) {
+                            alert('Not Success Lyrics');
+                            //$scope.Activity = response.data;
+                            console.log(response.data);
+                            //$scope.myWelcome = response.statusText;
+                        });
+
+                };
+
+                $scope.Back = function() {
+                    $scope.ViewData = 0;
+                };
+            });
+        </script>
+
+    </body>
+</html>
